@@ -86,7 +86,7 @@ Create a new API route that handles:
   ```json
   {
     "problem_text": "A bakery sold 45 cupcakes...",
-    "final_answer": 15
+    "correct_answer": 15
   }
   ```
 - Save the problem to `math_problem_sessions` table
@@ -130,19 +130,73 @@ When submitting your assessment, provide:
 2. **Live Demo URL**: Your Vercel deployment
 3. **Supabase Credentials**: Add these to your README for testing:
    ```
-   SUPABASE_URL: [Your Supabase Project URL]
-   SUPABASE_ANON_KEY: [Your Supabase Anon Key]
+   SUPABASE_URL: https://wzvyatbanyciarhjdkcl.supabase.co
+   SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dnlhdGJhbnljaWFyaGpka2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2ODk3MDMsImV4cCI6MjA3NjI2NTcwM30.96lO1HIBmMgqXQ4-_kQhwsIIac9E8hDN0crXmk3cehc
    ```
 
 ## Implementation Notes
 
 *Please fill in this section with any important notes about your implementation, design decisions, challenges faced, or features you're particularly proud of.*
 
-### My Implementation:
+### 1. AI‑Generated Math Problems
+- **Prompt Design**:  
+  - Crafted multiple system prompts that constrain the AI to generate *Primary 5 level* math problems.  
+  - Include explicit instructions for json format (e.g., question text, correct answer, & user's answer feedback).
+- **Validation**:  
+  - Post‑process AI output to ensure it’s valid JSON or a structured object.  
 
-- 
-- 
-- 
+---
+
+### 2. Persistence in Supabase
+- **Schema Design**:
+  - `math_problems_session` table: `id`,`problem_text`, `correct_answer`, `created_at`.
+  - `math_problems_submissions` table: `id`, `ssession_id`, `user_answer`, `is_correct`, `feedback_text`, `created_at`.
+- **Insert Flow**:
+  - After generating a problem, insert into `math_problems_session`.
+  - On user submission, insert into `math_problems_submissions` with AI feedback attached.
+- **Security**:
+  - Use Supabase Row Level Security (RLS) to ensure users can only read/write their own submissions.
+  - Consider JWT‑based auth for user sessions.
+
+---
+
+### 3. User Submissions + Feedback
+- **Submission Flow**:
+  - User submits answer → API endpoint receives it → AI evaluates correctness and generates feedback → Save both answer and feedback to `math_problems_submissions`.
+- **Feedback Generation**:
+  - Prompt AI with context: original problem, user’s answer, and guidelines for constructive, encouraging feedback.
+  - Ensure tone is supportive and educational, not punitive.
+
+---
+
+### 4. UI/UX (Clean + Mobile‑Responsive)
+- **Framework**:
+  - Use Next.js with Tailwind CSS for responsive design.
+  - Mobile‑first grid/flexbox design.
+  - Clear separation of problem text, input field, and feedback area.
+- **Accessibility**:
+  - Semantic HTML for screen readers.
+  - High‑contrast color palette and scalable font sizes.
+
+---
+
+### 5. Error Handling
+- **API Failures**:
+  - Wrap AI and Supabase calls in `try/catch`.
+  - Show user‑friendly error messages (“Something went wrong, please try again”).
+  - Log errors to monitoring service.
+- **Fallbacks**:
+  - If AI fails to generate a problem, serve a cached or pre‑generated problem.
+  - If feedback generation fails, return a generic encouragement message.
+
+---
+
+### 6. Loading States
+- **UI Indicators**:
+  - Use buttons as loader indicator.
+  - Disable "Generate New Problem" and "Submit Answer" buttons while awaiting responses from API calls.
+- **Progressive Feedback**:
+  - Show “Generating problem…” or “Evaluating answer…” messages to reassure users.
 
 ## Additional Features (Optional)
 

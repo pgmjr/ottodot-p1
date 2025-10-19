@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-
 interface MathProblem {
   problem_text: string
-  final_answer: number
+  correct_answer: number
 }
 
 export default function Home() {
@@ -14,18 +13,68 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const generateProblem = async () => {
-    // TODO: Implement problem generation logic
-    // This should call your API route to generate a new problem
-    // and save it to the database
+    setIsLoading(true)
+    setIsSubmitting(false)
+    setProblem(null)
+    setUserAnswer('')
+    setFeedback('')
+    setIsCorrect(null)
+    setSessionId(null)
+
+    try {
+      const response = await fetch('/api/math-problem', {
+        method: 'POST',
+      })
+      if (!response.ok) {
+        throw new Error('Failed to generate problem')
+      }
+      const data = await response.json()
+      setProblem(data.problem)
+      setSessionId(data.sessionId)
+    } catch (error) {
+      console.error(error)
+      setFeedback('Sorry, something went wrong while generating a problem. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const submitAnswer = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement answer submission logic
-    // This should call your API route to check the answer,
-    // save the submission, and generate feedback
+    if (!sessionId) return
+
+    setIsSubmitting(true)
+    setFeedback('')
+    setIsCorrect(null)
+
+    try {
+      const response = await fetch('/api/math-problem/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sessionId, answer: userAnswer }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit answer')
+      };
+
+      const data = await response.json();
+
+      setTimeout(() => { /* This resolve with the bug with isCorrect */
+        setFeedback(data.feedback);
+        setIsCorrect(data.isCorrect);
+      });
+
+    } catch (error) {
+      console.error(error)
+      setFeedback('Sorry, something went wrong while submitting your answer. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+
   }
 
   return (
@@ -34,7 +83,7 @@ export default function Home() {
         <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
           Math Problem Generator
         </h1>
-        
+
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <button
             onClick={generateProblem}
@@ -48,32 +97,34 @@ export default function Home() {
         {problem && (
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-700">Problem:</h2>
-            <p className="text-lg text-gray-800 leading-relaxed mb-6">
+            <p className="text-lg text-gray-800 leading-relaxed mb-6
+            border-[2px] border-dashed border-[#007bff] bg-[#f8faff] p-6 rounded-lg min-h-32 text-left">
               {problem.problem_text}
             </p>
-            
+
             <form onSubmit={submitAnswer} className="space-y-4">
               <div>
                 <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-2">
                   Your Answer:
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   id="answer"
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your answer"
-                  required
+                  required readOnly={isCorrect}
                 />
               </div>
-              
+
               <button
                 type="submit"
-                disabled={!userAnswer || isLoading}
+                disabled={!userAnswer || isSubmitting || isCorrect}
                 className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105"
               >
-                Submit Answer
+                {!userAnswer ? ' Submit Answer ' : (isSubmitting ? 'Evaluating answer...' : ' Submit Answer')}
+
               </button>
             </form>
           </div>

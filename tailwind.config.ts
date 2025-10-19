@@ -16,5 +16,12 @@ const config: Config = {
     },
   },
   plugins: [],
+  compilerOptions: {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
 }
-export default config
+
+export default config;

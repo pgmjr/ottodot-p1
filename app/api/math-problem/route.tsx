@@ -14,7 +14,7 @@ interface MathProblem {
 export async function POST() {
   try {
     // 1. Call Gemini API
-    const newPrompt = `You are a Primary 5 tutor. ${GENERATE_PROBLEM_PROMPT[Math.floor(Math.random() * GENERATE_PROBLEM_PROMPT.length)]}`;
+    const newPrompt = `You are a Primary 5 tutor. ${GENERATE_PROBLEM_PROMPT[Math.floor(Math.random() * GENERATE_PROBLEM_PROMPT.length)]}. Also, don't use any formating style such as markdown.`;
     const result = await gemini.generateContent(newPrompt);
 
     // 2. Check for empty or invalid response text

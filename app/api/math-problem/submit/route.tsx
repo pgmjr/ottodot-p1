@@ -36,6 +36,7 @@ export async function POST(request: Request) {
       - If incorrect, gently point out the mistake without giving the direct answer away immediately, and encourage them to try again. Hint at the method if possible.
 
       Return the response as a JSON object with one key: {"feedback_text": "..."}.
+      Also don't use any formating style to feedback_text value.
     `;
 
     const result = await gemini.generateContent(feedbackPrompt);

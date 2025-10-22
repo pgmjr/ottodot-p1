@@ -17,7 +17,7 @@
 
 body {
   margin: 0;
-  padding: 0 16px;
+  padding: 0;
   color: rgb(var(--foreground));
   background: none;
   background-color: var(--background);

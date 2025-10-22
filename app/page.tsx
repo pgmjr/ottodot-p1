@@ -87,7 +87,7 @@ export default function Home() {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <button
             onClick={generateProblem}
-            disabled={isLoading}
+            disabled={isLoading || !problem ? false : (!isCorrect ? true : false)}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105"
           >
             {isLoading ? 'Generating...' : 'Generate New Problem'}

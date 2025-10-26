@@ -66,7 +66,7 @@ export default function Home() {
       setTimeout(() => { /* This resolve with the bug with isCorrect */
         setFeedback(data.feedback);
         setIsCorrect(data.isCorrect);
-      });
+      }, 100);
 
     } catch (error) {
       console.error(error)
@@ -90,7 +90,7 @@ export default function Home() {
             disabled={isLoading ? true : (!problem ? false : (!isCorrect ? true : false))}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105"
           >
-            {isLoading ? 'Generating...' : 'Generate New Problem'}
+            {isLoading ? 'Generating...' : (isCorrect || !problem ? 'Generate New Problem' : 'Problem Generated')}
           </button>
         </div>
 
@@ -120,7 +120,7 @@ export default function Home() {
 
               <button
                 type="submit"
-                disabled={!userAnswer || isSubmitting || isCorrect}
+                disabled={(!userAnswer || isSubmitting || isCorrect) ?? false}
                 className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105"
               >
                 {!userAnswer ? ' Submit Answer ' : (isSubmitting ? 'Evaluating answer...' : ' Submit Answer')}
